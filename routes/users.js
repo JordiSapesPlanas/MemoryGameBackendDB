@@ -46,6 +46,7 @@ router.post('/:idUser/games', function(req,res, next){
 
 });
 router.put('/:idUser/games/:id', function(req, res, next){
+  //console.log(req.body)
     var idUser = parseInt(req.params.idUser);
     var idGame = parseInt(req.params.id);
     if(idGame && idUser){
