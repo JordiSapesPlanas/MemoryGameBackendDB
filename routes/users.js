@@ -23,6 +23,9 @@ router.get('/:idUser/games', function(req, res, next) {
     }else{
         next("id must be a number");
     }
+      // return list of users 
+  // res.status(200).send({data:[{winner: true, oponent:"quanEn", date:"avui"}, {winner:false, oponent:"jordi", date:"ahir"}]})
+
 });
 router.post('/:idUser/games', function(req,res, next){
   // TODO return the game that is post in the db
@@ -40,7 +43,6 @@ router.post('/:idUser/games', function(req,res, next){
     }else{
         next("id must be a number");
     }
-
 
 });
 router.put('/:idUser/games/:id', function(req, res, next){
