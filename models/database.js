@@ -1,3 +1,17 @@
+var MongoClient = require('mongodb').MongoClient
+var assert = require('assert');
+var url = 'mongodb://localhost:27017/myproject';
+var insertGameToUser = function(db, jsonObject, callback){
+    var collection = db.collection('users');
+    collection.insert([jsonObject], function(err, result){
+        if(err){
+            throw err
+        }else{
+            callback({data:jsonObject});
+        }
+    })
+}
+
 function Database(){
     this.user= null;
     this.initDate= null;
