@@ -6,6 +6,7 @@ var game = new Database();
 
 router.get('/:username', function(req,res, next){
   // TODO return a user and his ID
+  res.status(200).send({data:1});
 });
 
 router.get('/:idUser/games', function(req, res, next) {
