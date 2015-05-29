@@ -125,6 +125,7 @@ var addUserToBd = function(db, username, callback){
 Database.addNewUser = function(username, callback){
     MongoClient.connect(url, function(err, db){
         addUserToBd(db, username, callback);
+
     })
 };
 
