@@ -9,6 +9,14 @@ router.get('/:username', function(req,res, next){
   // TODO return a user and his ID
   res.status(200).send({data:1});
 });
+router.get('/', function(req, res, next){
+    Database.getAllUsers(function(err, users){
+        if(err) throw err;
+        else{
+            res.status(200).send({data:users});
+        }
+    })
+});
 router.post('/', function(req, res, next){
     console.log(req.body);
     console.log(req.body.username);
@@ -43,7 +51,7 @@ router.get('/:idUser/games', function(req, res, next) {
 router.post('/:idUser/games', function(req,res, next){
   // TODO return the game that is post in the db
 
-
+    var id = req.params.idUser;
     if(id) {
 
         Database.addGameToUser(id, function (err, game) {
@@ -100,10 +108,10 @@ router.get('/:idUser/games/:id', function(req, res, next){
     }
 });
 router.delete('/:idUser/games/:id', function(req, res, next){
-    var idUser = parseInt(req.params.idUser);
-    var idGame = parseInt(req.params.id);
+    var idUser = req.params.idUser;
+    var idGame = req.params.id;
     if(idGame && idUser){
-        Database.deleteGameFromUser(idGame, idUser, function(err, rows){
+        Database.deleteGame(idGame, function(err, rows){
             if(err){
                 next(err);
             }else{

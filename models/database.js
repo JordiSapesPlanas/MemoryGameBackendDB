@@ -35,7 +35,7 @@ var insertGame = function(db, callback){
 
 var getGamesFromUser = function(db, user, callback){
     var collection = db.collection('games');
-    collection.find({$or:[{loser:user.name}, {winner:user.name}]}).toArray(function(err, docs){
+    collection.find({$or:[{loser:user.username}, {winner:user.username}]}).toArray(function(err, docs){
         if(err){
             callback(err);
         }else{
@@ -50,16 +50,14 @@ var getGame= function(options, callback){
     var idGame = options.idGame;
     var collection= db.collection('games');
     collection.findOne({"_id":new ObjectId(idGame)}, function(err, docs){
-        console.log(err);
-        console.log(docs);
+
         if(err) {
             console.log(1)
             callback(err);
 
         }else if (!docs || _.isEmpty(docs)) {
-            console.log(2)
+            callback("game not found");
         }else{
-            console.log(3)
             callback(null, docs);
         }
 
@@ -81,17 +79,11 @@ var updateGame = function(options, callback){
             query = createQueryUpdate('loser', options.loser);
         }
         var collection = options.db.collection('games');
-        console.log(game._id);
-        console.log(query);
-        var obj = eval();
-        console.log(obj)
         collection.update({_id: new ObjectId(game._id)}, query,function(err, result){
             if(err){
-                console.log(err);
                 callback(err);
             }else{
-                console.log(result);
-                callback(null, result);
+                callback(null, result.result);
             }
         })
     });
@@ -104,16 +96,18 @@ var createQueryUpdate = function(key, value, gameId){
 
 
 
+
+
+
 function Database(){
     this.winner = "";
     this.loser = "";
     this.initDate = new Date();
-    this.finishDate = null;
 }
 
-var addUserToBd = function(db, username, callback){
+var addUserToBd = function(db, user, callback){
     var collection = db.collection('users');
-    collection.insert({username:username}, function(err, result){
+    collection.insert(user, function(err, result){
         if(err) callback(err);
         else {
             console.log(result);
@@ -122,9 +116,50 @@ var addUserToBd = function(db, username, callback){
     })
 };
 
-Database.addNewUser = function(username, callback){
+function User(){
+    this.username = null;
+}
+
+
+
+var deleteGame = function(db, id, callback){
+  var collection = db.collection('games');
+    collection.remove({"_id":new ObjectId(id)}, function(err, result){
+
+        if(err) throw err;
+        else{
+            callback(null, result);
+        }
+    })
+};
+Database.deleteGame = function(idGame, callback){
     MongoClient.connect(url, function(err, db){
-        addUserToBd(db, username, callback);
+        deleteGame(db, idGame, callback);
+    })
+};
+
+Database.restart = function(callback){
+    MongoClient.connect(url, function(err, db){
+        var collectionUser = db.collection('users');
+        var collectionGame = db.collection('games');
+        collectionUser.remove({}, function(err){
+            if(err) throw err;
+            else {
+                collectionGame.remove({}, function(err){
+                    if(err) throw err;
+                    else{
+                        callback(null);
+                    }
+                })
+            }
+        });
+
+    })
+};
+Database.addNewUser = function(user, callback){
+    var userModel = new User();
+    MongoClient.connect(url, function(err, db){
+        addUserToBd(db, _.extends(userModel, user) , callback);
     })
 };
 
@@ -134,15 +169,7 @@ Database.addGameToUser = function(idUser, callback){
         else insertGame(db, callback)
     })
 };
-Database.deleteGameFromUser = function(idGame, idUser, callback){
 
-
-
-    /*
-    MongoClient.connect(url, function(err, db){
-
-    })*/
-};
 Database.updateGameFromUser = function(options, callback){
     MongoClient.connect(url, function(err, db){
         options = _.extend(options, {db:db});
@@ -156,7 +183,7 @@ Database.updateGameFromUser = function(options, callback){
 
 };
 Database.getGamesFromUser = function(idUser, callback){
-    console.log(111111)
+
     MongoClient.connect(url, function(err, db){
 
         if(err){
@@ -174,8 +201,38 @@ Database.getGamesFromUser = function(idUser, callback){
         }
     })
 };
-Database.getGameFromUser = function(idGame, idUser, callback){
 
+
+
+
+
+var getAllDocument = function(options, callback){
+    var collection = options.db.collection(options.document);
+    collection.find({}).toArray(function(err, res){
+      console.log(res);
+        if(err) throw err;
+        else{
+            callback (null, res)
+        }
+    })
 };
+Database.getAllGames = function(callback){
+    MongoClient.connect(url, function(err, db){
+        if(err) throw err;
+        else{
+            getAllDocument({db:db, document:'games'}, callback);
+        }
+    })
+};
+
+Database.getAllUsers = function(callback){
+    MongoClient.connect(url, function(err, db){
+        if(err) throw err;
+        else{
+            getAllDocument({db:db, document:'users'}, callback);
+        }
+    })
+};
+
 
 module.exports = Database;
